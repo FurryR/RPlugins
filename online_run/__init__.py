@@ -5,6 +5,7 @@ import time
 from . import xes
 from aiohttp import ClientSession, WSMessage
 from typing import Literal
+from loguru import logger
 
 from graia.ariadne import Ariadne
 from graia.ariadne.event.message import GroupMessage, MessageEvent
@@ -62,6 +63,9 @@ async def execute_command(
     type: Literal["cpp"] | Literal["python"] = type.result.display.strip()
     raw: str = raw.result.display.strip()
     idx: int = raw.find("\n")
+    logger.log(
+        f"raw:{json.dumps(raw)} idx:{idx} raw[0:idx]:{raw[0:idx]} raw[idx+1:]:{raw[idx+1:]}"
+    )
     if idx == -1:
         return await send_message(event, MessageChain("不建议什么都不写就交上去。"), app.account)
     stdin: str = json.loads(raw[0:idx])
