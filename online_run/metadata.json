@@ -1,6 +1,6 @@
 {
   "name": "代码测试",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "pack": "module.online_run",
   "authors": ["suchen", "FurryR", "nullqwertyuiop"],
   "required": [],

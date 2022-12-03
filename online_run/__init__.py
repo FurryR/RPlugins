@@ -70,18 +70,19 @@ async def execute_command(
     logger.info(
         f"raw:{json.dumps(raw)} idx:{idx} raw[0:idx]:{raw[0:idx]} raw[idx+1:]:{raw[idx+1:]}"
     )
-    if idx != -1:
+    if idx != -1 and raw[0] == '"':
         stdin = json.loads(raw[0:idx])
         code = raw[idx + 1 :]
         if not isinstance(stdin, str):
-            return await send_message(event, MessageChain("你不会以为我会给你转成str吧？"), app.account)
+            return await send_message(
+                event, MessageChain("你不会以为我会给你转成str吧？"), app.account
+            )
     else:
         stdin = ""
         code = raw
     stdout, time_cost = await execute(run_type, code, stdin)
     image = await render(stdout, time_cost)
     await send_message(event, MessageChain(Image(data_bytes=image)), app.account)
-        
 
 
 async def _execute(
@@ -90,9 +91,12 @@ async def _execute(
     s = ""
     async with ClientSession() as session:
         c = await xes.create(
-            session, xes.Language.Cpp if run_type == "cpp" else xes.Language.Python, code, []
+            session,
+            xes.Language.Cpp if run_type == "cpp" else xes.Language.Python,
+            code,
+            [],
         )
-        s += f"[Host {c.host()}]"
+        s += f"[Host {c.host()}]\n"
         await c.send(stdin)
         try:
             while msg := await c.receive(10):
