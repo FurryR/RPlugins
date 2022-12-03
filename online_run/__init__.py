@@ -63,27 +63,32 @@ async def execute_command(
     run_type: Literal["cpp"] | Literal["python"] = run_type.result.display.strip()
     raw: str = raw.result.display.strip()
     idx: int = raw.find("\n")
+    code = ""
+    stdin = ""
     logger.info(
         f"raw:{json.dumps(raw)} idx:{idx} raw[0:idx]:{raw[0:idx]} raw[idx+1:]:{raw[idx+1:]}"
     )
-    if idx == -1:
-        return await send_message(event, MessageChain("不建议什么都不写就交上去。"), app.account)
-    stdin: str = json.loads(raw[0:idx])
-    code: str = raw[idx + 1 :]
-    if not isinstance(stdin, str):
-        return await send_message(event, MessageChain("你不会以为我会给你转成str吧？"), app.account)
+    if idx != -1:
+        stdin = json.loads(raw[0:idx])
+        code = raw[idx + 1 :]
+        if not isinstance(stdin, str):
+            return await send_message(event, MessageChain("你不会以为我会给你转成str吧？"), app.account)
+    else:
+        stdin = ""
+        code = raw
     stdout, time_cost = await execute(run_type, code, stdin)
     image = await render(stdout, time_cost)
     await send_message(event, MessageChain(Image(data_bytes=image)), app.account)
+        
 
 
 async def _execute(
     run_type: Literal["cpp"] | Literal["python"], code: str, stdin: str
 ) -> str:
     s = ""
-    async with ClientSession() as s:
+    async with ClientSession() as session:
         c = await xes.create(
-            s, xes.Language.Cpp if run_type == "cpp" else xes.Language.Python, code, []
+            session, xes.Language.Cpp if run_type == "cpp" else xes.Language.Python, code, []
         )
         s += f"[Host {c.host()}]"
         await c.send(stdin)
