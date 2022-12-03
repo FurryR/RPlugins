@@ -67,16 +67,17 @@ async def execute_command(
     idx: int = raw.find("\n")
     code = ""
     stdin = ""
-    logger.info(
-        f"raw:{json.dumps(raw)} idx:{idx} raw[0:idx]:{raw[0:idx]} raw[idx+1:]:{raw[idx+1:]}"
-    )
-    if idx != -1 and raw[0] == '"':
-        stdin = json.loads(raw[0:idx])
-        code = raw[idx + 1 :]
-        if not isinstance(stdin, str):
-            return await send_message(
-                event, MessageChain("你不会以为我会给你转成str吧？"), app.account
-            )
+    if idx != -1:
+        try:
+            stdin = json.loads(raw[0:idx])
+            code = raw[idx + 1 :]
+            if not isinstance(stdin, str):
+                return await send_message(
+                    event, MessageChain("你不会以为我会给你转成str吧？"), app.account
+                )
+        except BaseException:
+            stdin = ""
+            code = raw
     else:
         stdin = ""
         code = raw
@@ -105,11 +106,11 @@ async def _execute(
                 else:
                     match msg.type:
                         case xes.MsgType.System:
-                            s += f"[System {msg.data.decode(encoding='utf-8')}]"
+                            s += f"[System {msg.data.decode(encoding='utf-8')}]\n"
                         case xes.MsgType.Output:
                             s += msg.data.decode(encoding="utf-8")
                         case xes.MsgType.Unknown:
-                            s += f"[Unknown {msg.data.decode(encoding='utf-8')}]"
+                            s += f"[Unknown {msg.data.decode(encoding='utf-8')}]\n"
         except TimeoutError:
             await c.close()
             s += "\n[Timeout]"
