@@ -67,7 +67,7 @@ async def execute_command(
     idx: int = raw.find("\n")
     code = ""
     stdin = ""
-    if idx != -1:
+    if idx != -1 and raw[0] == '"':
         try:
             stdin = json.loads(raw[0:idx])
             code = raw[idx + 1 :]
