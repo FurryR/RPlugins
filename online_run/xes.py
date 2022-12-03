@@ -114,24 +114,3 @@ async def create(
         )
     )
     return XesRemote(ws, ws._response.headers["server"], echo)
-
-
-async def main():
-    async with ClientSession() as c:
-        a = await create(
-            c,
-            Language.Cpp,
-            """
-    #include<iostream>
-    int main() {
-        std::cout << "Hello World";
-    }
-    """,
-            [],
-            True,
-        )
-        async for i in a:
-            print(i.data.decode(encoding="utf-8"))
-
-
-asyncio.run(main())
