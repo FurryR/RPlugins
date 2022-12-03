@@ -46,8 +46,7 @@ channel = Channel.current()
             Twilight(
                 [
                     UnionMatch(["cpp", "python"]) @ "type",
-                    RegexMatch(r".*?\n") @ "stdin",  # 会多一个换行，但是对解析应该没有影响。
-                    WildcardMatch().flags(re.S) @ "code",
+                    WildcardMatch().flags(re.S) @ "raw",
                 ]
             )
         ],
@@ -58,19 +57,17 @@ channel = Channel.current()
     )
 )
 async def execute_command(
-    app: Ariadne,
-    event: MessageEvent,
-    type: MatchResult,
-    stdin: MatchResult,
-    code: MatchResult,
+    app: Ariadne, event: MessageEvent, type: MatchResult, raw: MatchResult
 ):
-    type: str = type.result.display.strip()
-    stdin: str = json.loads(stdin.result.display.strip())
-    code: str = code.result.display.strip()
+    type: Literal["cpp"] | Literal["python"] = type.result.display.strip()
+    raw: str = raw.result.display.strip()
+    idx: int = raw.find("\n")
+    if idx == -1:
+        return await send_message(event, MessageChain("不建议什么都不写就交上去。"), app.account)
+    stdin: str = json.loads(raw[0:idx])
+    code: str = raw[idx + 1 :]
     if not isinstance(stdin, str):
         return await send_message(event, MessageChain("你不会以为我会给你转成str吧？"), app.account)
-    if not code:
-        return await send_message(event, MessageChain("不建议什么都不写就交上去。"), app.account)
     stdout, time_cost = await execute(type, code, stdin)
     image = await render(stdout, time_cost)
     await send_message(event, MessageChain(Image(data_bytes=image)), app.account)
