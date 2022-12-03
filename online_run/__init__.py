@@ -46,7 +46,7 @@ channel = Channel.current()
         inline_dispatchers=[
             Twilight(
                 [
-                    UnionMatch(["cpp", "python"]) @ "type",
+                    UnionMatch(["cpp", "python"]) @ "run_type",
                     WildcardMatch().flags(re.S) @ "raw",
                 ]
             )
@@ -58,9 +58,9 @@ channel = Channel.current()
     )
 )
 async def execute_command(
-    app: Ariadne, event: MessageEvent, type: MatchResult, raw: MatchResult
+    app: Ariadne, event: MessageEvent, run_type: MatchResult, raw: MatchResult
 ):
-    type: Literal["cpp"] | Literal["python"] = type.result.display.strip()
+    run_type: Literal["cpp"] | Literal["python"] = run_type.result.display.strip()
     raw: str = raw.result.display.strip()
     idx: int = raw.find("\n")
     logger.info(
@@ -72,18 +72,18 @@ async def execute_command(
     code: str = raw[idx + 1 :]
     if not isinstance(stdin, str):
         return await send_message(event, MessageChain("你不会以为我会给你转成str吧？"), app.account)
-    stdout, time_cost = await execute(type, code, stdin)
+    stdout, time_cost = await execute(run_type, code, stdin)
     image = await render(stdout, time_cost)
     await send_message(event, MessageChain(Image(data_bytes=image)), app.account)
 
 
 async def _execute(
-    type: Literal["cpp"] | Literal["python"], code: str, stdin: str
+    run_type: Literal["cpp"] | Literal["python"], code: str, stdin: str
 ) -> str:
     s = ""
     async with ClientSession() as s:
         c = await xes.create(
-            s, xes.Language.Cpp if type == "cpp" else xes.Language.Python, code, []
+            s, xes.Language.Cpp if run_type == "cpp" else xes.Language.Python, code, []
         )
         s += f"[Host {c.host()}]"
         await c.send(stdin)
@@ -108,10 +108,10 @@ async def _execute(
 
 @timer(channel.module)
 async def execute(
-    type: Literal["cpp"] | Literal["python"], code: str, stdin: str
+    run_type: Literal["cpp"] | Literal["python"], code: str, stdin: str
 ) -> tuple[str, float]:
     start_time = time.perf_counter()
-    stdout = await _execute(type, code, stdin)
+    stdout = await _execute(run_type, code, stdin)
     return stdout, time.perf_counter() - start_time
 
 
