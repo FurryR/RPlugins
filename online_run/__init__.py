@@ -63,7 +63,7 @@ async def execute_command(
     type: Literal["cpp"] | Literal["python"] = type.result.display.strip()
     raw: str = raw.result.display.strip()
     idx: int = raw.find("\n")
-    logger.log(
+    logger.info(
         f"raw:{json.dumps(raw)} idx:{idx} raw[0:idx]:{raw[0:idx]} raw[idx+1:]:{raw[idx+1:]}"
     )
     if idx == -1:
