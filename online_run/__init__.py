@@ -28,6 +28,7 @@ from graia.saya.builtins.broadcast import ListenerSchema
 from library.decorator.blacklist import Blacklist
 from library.decorator.function_call import FunctionCall
 from library.decorator.distribute import Distribution
+from library.decorator.switch import Switch
 
 # from library.decorator.permission import Permission
 from library.decorator.timer import timer
@@ -47,12 +48,13 @@ channel = Channel.current()
         inline_dispatchers=[
             Twilight(
                 [
-                    UnionMatch(["cpp", "python"]) @ "run_type",
+                    UnionMatch([".cpp", ".python"]) @ "run_type",
                     WildcardMatch().flags(re.S) @ "raw",
                 ]
             )
         ],
         decorators=[
+            Switch.check(channel.module),
             Blacklist.check(),
             Distribution.distribute(),
             FunctionCall.record(channel.module),
