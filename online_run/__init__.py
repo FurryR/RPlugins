@@ -5,7 +5,6 @@ import time
 from . import xes
 from aiohttp import ClientSession, WSMessage
 from typing import Literal
-from loguru import logger
 
 from graia.ariadne import Ariadne
 from graia.ariadne.event.message import GroupMessage, MessageEvent
@@ -14,8 +13,6 @@ from graia.ariadne.message.element import Image
 from graia.ariadne.message.parser.twilight import (
     Twilight,
     UnionMatch,
-    RegexMatch,
-    FullMatch,
     WildcardMatch,
     MatchResult,
 )
@@ -31,11 +28,8 @@ from library.decorator.distribute import Distribution
 from library.decorator.switch import Switch
 from library.util.dispatcher import PrefixMatch
 
-# from library.decorator.permission import Permission
 from library.decorator.timer import timer
 
-# from library.model.config.eric import EricConfig
-# from library.model.permission import UserPerm
 from library.util.image import render_md
 from library.util.message import send_message
 from library.util.misc import seconds_to_string
