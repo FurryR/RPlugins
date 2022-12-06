@@ -1,0 +1,29 @@
+[
+    {
+        "name": "代码测试",
+        "version": "0.1.4",
+        "pack": "module.online_run",
+        "authors": [
+            "suchen",
+            "FurryR",
+            "nullqwertyuiop"
+        ],
+        "required": [],
+        "description": "通过 在线运行 API(学而思网校) 测试您的 C++/Python 代码。",
+        "category": [
+            "test:测试",
+            "utility:实用工具"
+        ],
+        "advanced": {
+            "allow_disable": true,
+            "allow_unload": true,
+            "hidden": false
+        },
+        "size": 9554,
+        "files": [
+            "__init__.py",
+            "xes.py",
+            "metadata.json"
+        ]
+    }
+]
