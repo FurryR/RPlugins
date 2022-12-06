@@ -29,6 +29,7 @@ from library.decorator.blacklist import Blacklist
 from library.decorator.function_call import FunctionCall
 from library.decorator.distribute import Distribution
 from library.decorator.switch import Switch
+from library.util.dispatcher import PrefixMatch
 
 # from library.decorator.permission import Permission
 from library.decorator.timer import timer
@@ -48,7 +49,8 @@ channel = Channel.current()
         inline_dispatchers=[
             Twilight(
                 [
-                    UnionMatch([".cpp", ".python"]) @ "run_type",
+                    PrefixMatch(),
+                    UnionMatch("cpp", "python") @ "run_type",
                     WildcardMatch().flags(re.S) @ "raw",
                 ]
             )
@@ -64,7 +66,7 @@ channel = Channel.current()
 async def execute_command(
     app: Ariadne, event: MessageEvent, run_type: MatchResult, raw: MatchResult
 ):
-    run_type: Literal[".cpp"] | Literal[".python"] = run_type.result.display.strip()
+    run_type: Literal["cpp"] | Literal["python"] = run_type.result.display.strip()
     raw: str = raw.result.display.strip()
     idx: int = raw.find("\n")
     code = ""
@@ -89,13 +91,13 @@ async def execute_command(
 
 
 async def _execute(
-    run_type: Literal[".cpp"] | Literal[".python"], code: str, stdin: str
+    run_type: Literal["cpp"] | Literal["python"], code: str, stdin: str
 ) -> str:
     s = ""
     async with ClientSession() as session:
         c = await xes.create(
             session,
-            xes.Language.Cpp if run_type == ".cpp" else xes.Language.Python,
+            xes.Language.Cpp if run_type == "cpp" else xes.Language.Python,
             code,
             [],
         )
@@ -122,7 +124,7 @@ async def _execute(
 
 @timer(channel.module)
 async def execute(
-    run_type: Literal[".cpp"] | Literal[".python"], code: str, stdin: str
+    run_type: Literal["cpp"] | Literal["python"], code: str, stdin: str
 ) -> tuple[str, float]:
     start_time = time.perf_counter()
     stdout = await _execute(run_type, code, stdin)
